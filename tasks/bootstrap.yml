@@ -1,0 +1,89 @@
+---
+- name: "Bootstrap: SSH key setup"
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+
+  - name: "Bootstrap: ensure SSH key exist"
+    cs_sshkeypair: 
+      name: demo 
+      public_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+- name: "Bootstrap: security group setup"
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  
+  - name: "Bootstrap: ensure security groups exists"
+    cs_securitygroup:
+      name: '{{ item }}'
+    with_items:
+    - Demo
+
+  - name: "Bootstrap: add inbound rules to security group Demo"
+    cs_securitygroup_rule:
+      security_group: Demo
+      start_port: '{{ item }}'
+      end_port: '{{ item }}'
+    with_items:
+    - 22
+    - 8080
+
+  - name: "Bootstrap: allow PGSQL traffic between instances"
+    cs_securitygroup_rule:
+      security_group: Demo
+      user_security_group: Demo
+      start_port: 5432
+      end_port: 5432
+      protocol: '{{ item }}'
+    with_items:
+    - tcp
+
+  - name: "Bootstrap: ensure affinity groug exists"
+    cs_affinitygroup:
+      name: pgsql
+      affinty_type: host anti-affinity
+
+- name: "Bootstrap: deploy Instances"
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+
+  - name: "Bootstrap: deploy PGDB Master"
+    cs_instance:
+      name: PGSQL-MASTER
+      template: "{{ cs_template }}"
+      service_offering: Small
+      security_groups:
+      - Demo
+      affinity_groups: pgsql
+      ssh_key: demo
+    register: pgmaster
+
+  - name: "Bootstrap: deploy PGDB Slave"
+    cs_instance:
+      name: PGSQL-SLAVE1
+      template: "{{ cs_template }}"
+      service_offering: Small
+      security_groups:
+      - Demo
+      affinity_groups: pgsql
+      ssh_key: demo
+    register: pgslave
+
+  - name: "Bootstrap: assing IP to the inventory"
+    add_host: hostname={{ pgmaster.default_ip }} groups=pgsql,pgmaster
+
+  - name: "Bootstrap: assing IP to the inventory"
+    add_host: hostname={{ pgslave.default_ip }} groups=pgsql,pgslaves
+
+  - name: "Bootstrap: waiting for SSH to come up"
+    wait_for: port=22 host={{ pgmaster.default_ip }}
+
+  - name: "Bootstrap: waiting for SSH to come up"
+    wait_for: port=22 host={{ pgslave.default_ip }}
+
+

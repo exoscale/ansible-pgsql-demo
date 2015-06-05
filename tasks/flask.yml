@@ -1,0 +1,22 @@
+# file: tasks/flask.yml
+
+- name: "Flask: install flask binaries"
+  pip: name={{item}} extra_args="{{ pip_install_args }}"
+  with_items:
+    - flask
+    - Flask-SQLAlchemy
+
+- name: "Flask: clone flask test app"
+  git: repo=https://github.com/llambiel/flask-pgsql-demo.git dest=/srv/flask-pgsql-demo
+
+- name: "Add flask test app upstart job"
+  template:
+    src: flaskpgsql.conf
+    dest: "/etc/init/flaskpgsql.conf"
+    owner: "root"
+    group: "root"
+    mode: 0640
+
+- name: "Flask: start our flask test app"
+  service: name=flaskpgsql state=started
+

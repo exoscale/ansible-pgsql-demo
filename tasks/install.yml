@@ -1,0 +1,52 @@
+---
+
+- name: "Install: Setup PGSQL"
+  remote_user: root
+  hosts: pgsql
+  gather_facts: yes
+  pre_tasks:
+  - name: apt-get update
+    apt: update_cache=yes cache_valid_time=86400
+
+  tasks:
+
+  - name: "Install: Build hosts file"
+    lineinfile: dest=/etc/hosts regexp='{{ ansible_default_ipv4.address }}' line="{{ ansible_default_ipv4.address }} {{ ansible_hostname }}" state=present
+
+  - name: "Install: install packages"
+    apt: pkg={{ item }}
+    with_items:
+    - postgresql
+    - postgresql-contrib
+    - postgresql-client
+    - git
+    - libpq-dev
+    - python-psycopg2
+    - python-pip
+    - python-dev
+    - daemontools
+    - libffi-dev
+    - lzop
+
+  - name: "Install: Upgrade pip"
+    pip: name={{item}} extra_args=--upgrade
+    with_items:
+      - pip
+
+  - name: "Install: install WAL-E"
+    pip: name=wal-e extra_args="{{ pip_install_args }}"
+
+  - name: "Install: Create wal-e env dir"
+    file: path=/etc/wal-e.d/env state=directory mode=0750 owner=root group=postgres force=yes
+
+  - name: "Install: Create wal-e AWS access key config"
+    lineinfile: dest=/etc/wal-e.d/env/AWS_ACCESS_KEY_ID line="{{ aws_key }}" owner=root group=postgres state=present create=yes mode=0640
+
+  - name: "Install: Create wal-e AWS secret key config"
+    lineinfile: dest=/etc/wal-e.d/env/AWS_SECRET_ACCESS_KEY line="{{ aws_secret }}" owner=root group=postgres state=present create=yes mode=0640
+
+  - name: "Install: Create wal-e AWS bucket config"
+    lineinfile: dest=/etc/wal-e.d/env/WALE_S3_PREFIX line="{{ aws_bucket }}" owner=root group=postgres state=present create=yes mode=0640
+
+  - name: "Install: Create wal-e AWS endpoint"
+    lineinfile: dest=/etc/wal-e.d/env/WALE_S3_ENDPOINT line="{{ aws_endpoint }}" owner=root group=postgres state=present create=yes mode=0640

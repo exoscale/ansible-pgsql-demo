@@ -1,0 +1,64 @@
+# file: tasks/configure-master.yml -- postgresql pre-start configuration of master server and startup
+
+- name: "Configure-master: stop old postgresql service"
+  service: name="postgresql" state=stopped
+  when: postgresql_drop_old_cluster
+
+- name: "Configure-master:: remove existing data dir"
+  file: path="/var/lib/postgresql/{{ postgresql_version }}/main" state=absent
+  when: postgresql_drop_old_cluster
+
+- name: "Configure-master:: initialize new postgresql cluster"
+  sudo: yes
+  sudo_user: "{{ postgresql_admin_user }}"
+  command: "/usr/lib/postgresql/{{ postgresql_version }}/bin/initdb -D /var/lib/postgresql/{{ postgresql_version }}/main"
+  when: postgresql_drop_old_cluster
+
+- name: "Configure-master: configure pg_hba.conf"
+  template:
+    src: pg_hba.conf.j2
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    owner: "{{ postgresql_admin_user }}"
+    group: "{{ postgresql_admin_user }}"
+    mode: 0640
+
+- name: "Configure-master: configure postgresql.conf"
+  lineinfile:
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    state: present
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.guc }}"
+  with_items: postgresql_conf_default_guc
+
+- name: "Configure-master: enable archive mode"
+  lineinfile:
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    state: present
+    regexp: "^#?archive_mode = .*$"
+    line: "archive_mode = 'on'"
+
+- name: "Configure-master: set archive mode timeout"
+  lineinfile:
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    state: present
+    regexp: "^#?archive_timeout = .*$"
+    line: "archive_timeout = 60 "
+
+- name: "Configure-master: set archive mode command"
+  lineinfile:
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    state: present
+    regexp: "^#?archive_command = .*$"
+    line: "archive_command = 'envdir /etc/wal-e.d/env /usr/local/bin/wal-e wal-push {{ postgresql_main_directory }}%p'"
+
+- name: "Configure-master: create postgresql log directory"
+  file:
+    path: "{{ postgresql_log_directory }}"
+    state: directory
+    owner: "{{ postgresql_admin_user }}"
+    group: "{{ postgresql_admin_user }}"
+    mode: 0755
+  when: postgresql_log_directory is defined
+
+- name: "Configure-master: start postgresql service"
+  service: name="postgresql" state=started enabled=yes

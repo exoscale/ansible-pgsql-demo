@@ -1,0 +1,36 @@
+---
+# Install and setup PostgreSQL Streaming Replication
+- name: bootstrap
+  hosts: localhost
+  include: 'tasks/bootstrap.yml'
+
+- name: Base setup
+  hosts: pgsql
+  vars_files:
+    - '../defaults/main.yml'
+  include: 'tasks/install.yml'
+
+- name: setup master
+  hosts: pgmaster
+  vars_files:
+    - 'defaults/main.yml'
+  tasks:
+  - include: 'tasks/configure-master.yml'
+  - include: 'tasks/users.yml'
+  - include: 'tasks/databases.yml'
+
+- name: setup slaves
+  hosts: pgslaves
+  vars_files:
+    - 'defaults/main.yml'
+  tasks:
+  - include: 'tasks/configure-slaves.yml'
+
+- name: setup test flask app
+  hosts: pgsql
+  vars_files:
+    - 'defaults/main.yml'
+  tasks:
+  - include: 'tasks/flask.yml'
+    when: deploy_flask_testapp
+
