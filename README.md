@@ -51,7 +51,7 @@ The bucket must be created prior running the playbook. [s3cmd](http://s3tools.or
 To run the playbook:
 
 ```
-ansible-playbook role.yml 
+ansible-playbook -v role.yml 
 ```
 
 ## Notice
