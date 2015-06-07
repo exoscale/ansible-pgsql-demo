@@ -44,7 +44,7 @@ The following variables needs be edited:
 * aws_secret: "mysecret"
 * aws_bucket: "s3://mybucket/directory/or/whatever"
 
-The bucket must be created prior running the playbook. [s3cmd](http://s3tools.org/s3cmd) or any S3 compatible tool may ibe used for this purpose.
+The bucket must be created prior running the playbook. [s3cmd](http://s3tools.org/s3cmd) or any S3 compatible tool may be used for this purpose.
 
 ## Running the playbook 
 
