@@ -29,7 +29,6 @@
       end_port: '{{ item }}'
     with_items:
     - 22
-    - 8080
 
   - name: "Bootstrap: allow PGSQL traffic between instances"
     cs_securitygroup_rule:
