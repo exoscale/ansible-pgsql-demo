@@ -2,6 +2,8 @@
 # Install and setup PostgreSQL Streaming Replication
 - name: bootstrap
   hosts: localhost
+  vars_files:
+    - '../defaults/main.yml'
   include: 'tasks/bootstrap.yml'
 
 - name: Base setup
