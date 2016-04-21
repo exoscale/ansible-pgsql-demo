@@ -9,6 +9,7 @@ The goal of this playbook is to demonstrate how fast & easy it can be to deploy 
 ### Prerequisites
 
 ```
+apt-get update && apt-get install -y git python-pip python-dev build-essential
 git clone https://github.com/exoscale/ansible-pgsql-demo
 cd ansible-pgsql-demo
 make
