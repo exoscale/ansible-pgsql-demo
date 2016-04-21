@@ -35,7 +35,7 @@ Your SSH RSA public key must be present at the following location: '~/.ssh/id_rs
 A few variables must be setup prior executing this playbook. These variables are located in the following file:
 
 ```
-default/main.yml
+defaults/main.yml
 ```
 
 The following variables needs be edited:
