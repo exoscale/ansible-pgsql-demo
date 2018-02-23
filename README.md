@@ -1,6 +1,6 @@
 # ansible-pgsql-demo
 
-An Ansible playbook to deploy postgresql in a master - slave replication configuration on [Exoscale](https://exoscale.ch/) cloud, including continous wal archiving in Exoscale [S3 compatible object store](https://www.exoscale.ch/open-cloud/storage/) using wal-e [wal-e](https://github.com/wal-e/wal-e).
+An Ansible playbook to deploy postgresql in a master - slave replication configuration on [Exoscale](https://www.exoscale.com/) cloud, including continous wal archiving in Exoscale [S3 compatible object store](https://www.exoscale.com/object-storage/) using wal-e [wal-e](https://github.com/wal-e/wal-e).
 
 The goal of this playbook is to demonstrate how fast & easy it can be to deploy applications with high availability into the cloud using Ansible.
 
