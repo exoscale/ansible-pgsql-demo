@@ -17,7 +17,7 @@ make
 
 ### API Key setup
 
-You need to setup your API keys. The Key & secret can be found within your [portal](https://portal.exoscale.ch) under the account section.
+You need to setup your API keys. The Key & secret can be found within your [portal](https://portal.exoscale.com) under the account section.
 
 ```
 cat $HOME/.cloudstack.ini
